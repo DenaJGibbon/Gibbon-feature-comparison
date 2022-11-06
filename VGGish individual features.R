@@ -42,16 +42,32 @@ for(i in 1:length(Tempfiles)){
   }
   
   colnames(New3secDF) <- paste('V',seq(1,128,1),sep='')
+  New3secDF$Duration <- nrow(Tempcsv)
   
   New3secDF <- cbind.data.frame(Class,New3secDF)
-  VGGishDF <- rbind.data.frame(VGGishDF,Temp.rw.class )
+  VGGishDF <- rbind.data.frame(VGGishDF,New3secDF )
 }
 
-
 VGGishDF$Individual <- paste(str_split_fixed(VGGishDF$Class,
-                                    pattern = '_',n=3)[,1],
-                    str_split_fixed(VGGishDF$Class,
-                                    pattern = '_',n=3)[,2],sep='_')
+                                             pattern = '_',n=3)[,1],
+                             str_split_fixed(VGGishDF$Class,
+                                             pattern = '_',n=3)[,2],sep='_')
+
+
+VGGishDF <- droplevels(subset(VGGishDF, Individual !='DK_04',Individual !='DV_04',Individual !='DV_11',
+                                       Individual !='KB_01',Individual !='MB_08',Individual !='SAFA_01',
+                                       Individual !='SAFA_03',Individual !='SAFA_09'))
+
+VGGishDF$Individual <- as.factor(VGGishDF$Individual)
+
+ml.model.rf.vggish <-
+  randomForest::randomForest(x = VGGishDF[,-c(1,130,131)], y = VGGishDF$Individual)
+
+1-min(ml.model.rf.vggish$err.rate[,1])
+
+VGGishPercentCorrect <- 
+  round(1-min(ml.model.rf.vggish$err.rate[,1]),2)
+
 
 
 AcousticSignals.umap <-
@@ -65,139 +81,89 @@ plot.for.AcousticSignals <-
 colnames(plot.for.AcousticSignals) <-
   c("Dim.1", "Dim.2","Class")
 
+VGGishPercentCorrect <- 
+  round(1-min(ml.model.rf.vggish$err.rate[,1]),2)
 
-ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
+
+VGGishScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                   y = "Dim.2",
-                  color='Class')+guides(color='none')
+                  color='Class')+guides(color='none')+
+  scale_color_manual(values = viridis::viridis (length(
+    unique(plot.for.AcousticSignals$Class)
+  ))) + guides(color="none")+ggtitle( paste('VGGish',VGGishPercentCorrect, '% Correct'))
+
+VGGishScatter
 
 
+# VGGish Mean SD ----------------------------------------------------------
+VGGishDFMeanSD <- data.frame()
 
-# Ml comparison
-
-svm.model.vggish <-
-  e1071::svm(
-    VGGishDF[,-c(1,2,3,259)],
-    as.factor(VGGishDF$Class),
-    kernel = "radial",
-    type = "C-classification",
-    cross = 5,
-    probability = TRUE
-  )
-
-svm.model.vggish$tot.accuracy
-
-subset.directory <-
-  '/Users/denaclink/Desktop/RStudio Projects/gibbonID/data/FemaleGibbonsSwiftHQ/'
-
-source('R/MFCCFunction.R')
-ValidationDF <- read.csv('gibbon.validation.dfHQfullstructure.csv')
-ValidationDF <- droplevels(subset(ValidationDF,target.signal=='y'))
-
-for(a in 1:nrow(ValidationDF)){
-  TempRow <- ValidationDF[a,]
-  TempWave <- readWave(TempRow$full.name)
-  WaveName <- str_replace(TempRow$full.name,'FemaleGibbonsSwift','FemaleGibbonsSwiftHQ')
-  writeWave(TempWave,filename = WaveName)
+for(i in 1:length(Tempfiles)){
+  print(i)
+  Tempcsv <- read.delim(Tempfiles[i])
+  Duration <- nrow(Tempcsv)
+  n.slash  <- str_count(Tempfiles[i], pattern = "/")[1] + 1
+  
+  Temp.name <- str_split_fixed(Tempfiles[i],pattern = "/",n=n.slash)[,n.slash]
+  Class <- str_split_fixed(Temp.name,pattern = '.csv',n=2)[,1]
+  
+  Individual <- paste(str_split_fixed(Class,
+                                      pattern = '_',n=3)[,1],
+                      str_split_fixed(Class,
+                                      pattern = '_',n=3)[,2],sep='_')
+  
+    Tempcsv <- colMeans(Tempcsv)
+  TempRow <- data.frame()
+  
+  TempRow <- rbind.data.frame(TempRow,Tempcsv)
+  colnames(TempRow) <- paste('V',seq(1,128,1),sep='')
+  
+  TempRow$Individual <- Individual
+  TempRow$Duration <- Duration
+  VGGishDFMeanSD <- rbind.data.frame(VGGishDFMeanSD,TempRow )
 }
 
 
-trainingdata <- MFCCFunctionMeanSD(input.dir= subset.directory, min.freq = 400, max.freq = 1600)
+VGGishDFMeanSD <- 
+  subset(VGGishDFMeanSD, ! Individual %in% c('DK_04','DV_04','DV_11','KB_01','MB_08','SAFA_01','SAFA_03','SAFA_09'))
 
-traningdatanames <- list.files(subset.directory,
-                               full.names = F)
+VGGishDFMeanSD <- droplevels(VGGishDFMeanSD)
 
-trainingdata$Class <- str_split_fixed(traningdatanames,pattern = '.wav',n=2)[,1]
+VGGishDFMeanSD$Individual <- as.factor(VGGishDFMeanSD$Individual)
 
+ml.model.rf.vggish <-
+  randomForest::randomForest(x = VGGishDFMeanSD[,-c(129)], y = VGGishDFMeanSD$Individual)
 
-trainingdata$class <- as.factor(trainingdata$class)
+1-min(ml.model.rf.vggish$err.rate[,1])
 
-# svm.model.mfcc <-
-#   e1071::svm(
-#     trainingdata[,-c(1)],
-#     as.factor(trainingdata$class),
-#     kernel = "radial",
-#     type = "C-classification",
-#     cross = 25,
-#     probability = TRUE
-#   )
-#
-# svm.model.mfcc$tot.accuracy
-
-AcousticSignalsMFCC.umap <-
-  umap::umap(trainingdata[,-c(1,51)],
-             #labels=as.factor(trainingdata$Class),
-             controlscale=TRUE,scale=3)
-
-plot.for.AcousticSignalsMFCC <-
-  cbind.data.frame(AcousticSignalsMFCC.umap$layout[,1:2],
-                   trainingdata$class)
-
-colnames(plot.for.AcousticSignalsMFCC) <-
-  c("Dim.1", "Dim.2", "Class")
-
-plot.for.AcousticSignalsMFCC$Class <- as.factor(plot.for.AcousticSignalsMFCC$Class)
-
-
-ggpubr::ggscatter(data = plot.for.AcousticSignalsMFCC,x = "Dim.1",
-                  y = "Dim.2",
-                  color  = "Class", shape='Class')
-
-
-
-# Unsupervised clustering -------------------------------------------------
-
-AcousticSignalsAP <-
-  apcluster::apcluster(negDistMat(r=2),q= 0.1,
-                       trainingdata[,-c(1,51)],
-                       maxits=100000,convits=10000)
+VGGishPercentCorrect <- 
+  round(1-min(ml.model.rf.vggish$err.rate[,1]),2)
 
 
 
 AcousticSignals.umap <-
-  umap::umap(trainingdata[,-c(1,51)],
-             labels=as.factor( as.numeric(AcousticSignalsAP@idx)),
+  umap::umap(VGGishDFMeanSD[,-c(129)],
+             #labels=as.factor(VGGishDFMeanSD$Validation),
              controlscale=TRUE,scale=3)
 
 plot.for.AcousticSignals <-
-  cbind.data.frame(AcousticSignals.umap$layout[,1:2],#VGGishDF$PercentClass,
-                   as.factor( as.numeric(AcousticSignalsAP@idx)))
+  cbind.data.frame(AcousticSignals.umap$layout[,1:2],VGGishDFMeanSD$Individual)
 
 colnames(plot.for.AcousticSignals) <-
-  c("Dim.1", "Dim.2","Cluster")
+  c("Dim.1", "Dim.2","Class")
 
-plot.for.AcousticSignals$Cluster <- as.factor(plot.for.AcousticSignals$Cluster)
-
-ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
-                  y = "Dim.2",
-                  color='Cluster')
-
-table(plot.for.AcousticSignals$Validation,plot.for.AcousticSignals$Cluster)
+VGGishPercentCorrect <- 
+  round(1-min(ml.model.rf.vggish$err.rate[,1]),3)
 
 
+VGGishScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
+                                   y = "Dim.2",
+                                   color='Class')+guides(color='none')+
+  scale_color_manual(values = viridis::viridis (length(
+    unique(plot.for.AcousticSignals$Class)
+  ))) + guides(color="none")+ggtitle( paste('VGGish',VGGishPercentCorrect*100, '% Correct'))
 
-source('R/AffinityBiplotAddSpectrograms.R')
-set.seed(13)
-AffinityBiplotAddSpectrograms(input.dir.Focal='data/FemaleGibbonsSwiftHQ',
-                              output.dir.Focal = 'data/FemaleGibbonsSwiftHQ/Thumbnails/',
-                              min.freq = 400, max.freq = 1500,main='Female Gibbon Calls',class='fixed')
+VGGishScatter
 
-source('R/UMAPBiplotAddSpectrograms.R')
-
-UMAPBiplotAddSpectrograms(input.dir.Focal='data/FemaleGibbonsSwiftHQ',
-                              output.dir.Focal = 'data/FemaleGibbonsSwiftHQ/Thumbnails/',
-                              min.freq = 400, max.freq = 1500,main='Female Gibbon Calls',class='fixed')
-
-
-source('R/AffinityBiplotAddSpectrograms.R')
-source('R/UMAPBiplotAddSpectrograms.R')
-source('R/MFCCFunctionMeanSD.R')
-set.seed(13)
-AffinityBiplotAddSpectrograms(input.dir.Focal='/Users/denaclink/Desktop/RStudio Projects/gibbonID/TrueFalsePositives',
-                              output.dir.Focal = '/Users/denaclink/Desktop/RStudio Projects/gibbonID/TrueFalsePositives/Thumbnails/',
-                              min.freq = 400, max.freq = 1500,main='gibbonR detections',class='fixed')
-
-
-UMAPBiplotAddSpectrograms(input.dir.Focal='/Users/denaclink/Desktop/RStudio Projects/gibbonID/TrueFalsePositives',
-                              output.dir.Focal = '/Users/denaclink/Desktop/RStudio Projects/gibbonID/TrueFalsePositives/ThumbnailsUMAP/',
-                              min.freq = 400, max.freq = 1500,main='gibbonR detections')
+write.csv(VGGishDFMeanSD,'data/VGGishDFMeanSDoriginal.csv',row.names = F)
 
