@@ -207,7 +207,7 @@ TestData <- mfcc.noise.output.df[-TrainingSamples,]
 
 ml.model.rf.mfcc.noise <-
   randomForest::randomForest(x =  TrainingData[,-c(1)], y =  TrainingData$Individual,
-                             ntree = 500, random_state = 0,keep.forest=TRUE)
+                              random_state = 0,keep.forest=TRUE)
 
 TestPredictions <- predict(ml.model.rf.mfcc.noise,newdata=TestData[,-c(1)])
 
@@ -249,3 +249,6 @@ mfcc.noiseScatter
 
 
 write.csv(mfcc.noise.output.df,'data/mfcc.noise6db.output.df.csv',row.names = F)
+
+
+

@@ -5,7 +5,7 @@ library(apcluster)
 library(tuneR)
 
 Tempfiles <-
-  list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-djc426@cornell.edu/.shortcut-targets-by-id/0B-Zf1l3eDDLjd2g5RHJEZlA5Sms/AllGreatCallWaveFiles/vggish_embeddings_original",full.names = T,
+  list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-djc426@cornell.edu/.shortcut-targets-by-id/0B-Zf1l3eDDLjd2g5RHJEZlA5Sms/AllGreatCallWaveFiles/downsampled_files/vggish_embeddings_original",full.names = T,
              recursive = T)
 
 # VGGish Mean SD ----------------------------------------------------------
