@@ -135,6 +135,8 @@ AcousticIndicesNoiseDF <- droplevels(AcousticIndicesNoiseDF)
 
 AcousticIndicesNoiseDF$Individual <- as.factor(AcousticIndicesNoiseDF$Individual)
 
+
+
 ml.model.rf.acoustic <-
   randomForest::randomForest(x = AcousticIndicesNoiseDF[,-c(6)], y = AcousticIndicesNoiseDF$Individual)
 

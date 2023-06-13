@@ -106,20 +106,19 @@ colnames(plot.for.AcousticSignals) <-
 
 
 MFCCPercentCorrect <- 
-  round(mean(unlist(RandomizationAccuracyMFCCoriginal)),3)
+  round(median(unlist(RandomizationAccuracyMFCC)),3)
 
 
 MFCCScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                             y = "Dim.2",
                                             color='Class')+guides(color='none')+
-  scale_color_manual(values = viridis::viridis (length(
+  scale_color_manual(values = matlab::jet.colors (length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('MFCC',MFCCPercentCorrect*100, '% Correct'))
 
 MFCCScatter
 
-
-write.csv(mfcc.output.df,'data/mfcc.output.df.csv',row.names = F)
+#write.csv(mfcc.output.df,'data/mfcc.output.df.csv',row.names = F)
 
 
 # Noise -------------------------------------------------------------------
@@ -241,14 +240,14 @@ mfcc.noisePercentCorrect <-
 mfcc.noiseScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                  y = "Dim.2",
                                  color='Class')+guides(color='none')+
-  scale_color_manual(values = viridis::viridis (length(
+  scale_color_manual(values = matlab::jet.colors (length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('MFCC Noise',mfcc.noisePercentCorrect*100, '% Correct'))
 
 mfcc.noiseScatter
 
 
-write.csv(mfcc.noise.output.df,'data/mfcc.noise6db.output.df.csv',row.names = F)
+#write.csv(mfcc.noise.output.df,'data/mfcc.noise6db.output.df.csv',row.names = F)
 
 
 

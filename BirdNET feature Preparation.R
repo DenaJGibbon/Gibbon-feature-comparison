@@ -3,23 +3,19 @@ library(stringr)
 library(ggplot2)
 set.seed(13)
 
-BirdNetFeaturelist <- 
-  list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-djc426@cornell.edu/.shortcut-targets-by-id/0B-Zf1l3eDDLjd2g5RHJEZlA5Sms/AllGreatCallWaveFiles/BirdNetEmbeddingsVocalIndividual/",
+BirdNetFiles <- 
+  list.files("data/BirdNETembeddings",
              full.names = T)
 
-BirdNetFeaturelistshort <- 
-  list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-djc426@cornell.edu/.shortcut-targets-by-id/0B-Zf1l3eDDLjd2g5RHJEZlA5Sms/AllGreatCallWaveFiles/BirdNetEmbeddingsVocalIndividual/",
+BirdNetFilesShort <- 
+  list.files("data/BirdNETembeddings",
              full.names = F)
 
 CombinedBirdNetFeatures <- data.frame()
 
-for(z in 1:length(BirdNetFeaturelist)){
-
-BirdNetFiles <-   list.files(BirdNetFeaturelist[z],full.names = T)
-BirdNetFilesShort <-   list.files(BirdNetFeaturelist[z],full.names = F)
-CallID <- str_split_fixed(BirdNetFilesShort[z],'.bird',n=2)[,1]
+CallID <- str_split_fixed(BirdNetFilesShort,'.bird',n=2)[,1]
 Individual <- str_split_fixed(CallID,'[.]',n=2)[,1]
-TrainingData <- BirdNetFeaturelistshort[z]
+TrainingData <- 'original'
 for(a in 1:length(BirdNetFiles)){
   CallID <- str_split_fixed(BirdNetFilesShort[a],'.bird',n=2)[,1]
   Individual <- str_split_fixed(CallID,'[.]',n=2)[,1]
@@ -52,8 +48,6 @@ for(a in 1:length(BirdNetFiles)){
   CombinedBirdNetFeatures <- rbind.data.frame(CombinedBirdNetFeatures,NewDataFrame)
   }
 
-}
-
 
 
 CombinedBirdNetFeatures$Individual <- paste(str_split_fixed(CombinedBirdNetFeatures$Individual,
@@ -71,7 +65,7 @@ CombinedBirdNetFeatures$Individual <- as.factor(CombinedBirdNetFeatures$Individu
 (unique(CombinedBirdNetFeatures$Individual))
 
 ml.model.rf.birdnet.mean <-
-  randomForest::randomForest(x = CombinedBirdNetFeatures[,-c(321:324)], y = CombinedBirdNetFeatures$Individual)
+  randomForest::randomForest(x = CombinedBirdNetFeatures[,-c(1025:1028)], y = CombinedBirdNetFeatures$Individual)
 
 
 1-min(ml.model.rf.birdnet.mean$err.rate[,1])
@@ -79,7 +73,7 @@ ml.model.rf.birdnet.mean <-
 
 AcousticSignals.umap <-
   umap::umap(
-    CombinedBirdNetFeatures[,-c(321:324)],
+    CombinedBirdNetFeatures[,-c(1025:1028)],
     n_neighbors = 12,
     controlscale = TRUE,
     scale = 3
@@ -112,7 +106,7 @@ BirdNetScatterMean <- ggpubr::ggscatter(
 
 BirdNetScatterMean
 
-write.csv(CombinedBirdNetFeatures,'data/CombinedBirdNetFeatures.csv',row.names = F)
+write.csv(CombinedBirdNetFeatures,'data/CombinedBirdNetFeaturesV2.csv',row.names = F)
 
 
 
@@ -122,13 +116,13 @@ write.csv(CombinedBirdNetFeatures,'data/CombinedBirdNetFeatures.csv',row.names =
 CombinedBirdNetNoiseFeatures <- data.frame()
 
 
-  BirdNetNoiseFiles <-   list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-djc426@cornell.edu/.shortcut-targets-by-id/0B-Zf1l3eDDLjd2g5RHJEZlA5Sms/AllGreatCallWaveFiles/BirdNetEmbeddingsVocalIndividual/output6db",
+  BirdNetNoiseFiles <-   list.files("data/BirdNETembeddings6dB",
                                     full.names = T)
   
-  BirdNetNoiseFilesShort <-    list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-djc426@cornell.edu/.shortcut-targets-by-id/0B-Zf1l3eDDLjd2g5RHJEZlA5Sms/AllGreatCallWaveFiles/BirdNetEmbeddingsVocalIndividual/output6db",
+  BirdNetNoiseFilesShort <-    list.files("data/BirdNETembeddings6dB",
                                           full.names = F)
   
-  CallID <- str_split_fixed(BirdNetNoiseFilesShort[z],'.bird',n=2)[,1]
+  CallID <- str_split_fixed(BirdNetNoiseFilesShort,'.bird',n=2)[,1]
   Individual <- str_split_fixed(CallID,'[.]',n=2)[,1]
   TrainingData <- 'noise6b'
   
@@ -184,7 +178,7 @@ CombinedBirdNetNoiseFeatures$Individual <- as.factor(CombinedBirdNetNoiseFeature
 (unique(CombinedBirdNetNoiseFeatures$Individual))
 
 ml.model.rf.BirdNetNoise.mean <-
-  randomForest::randomForest(x = CombinedBirdNetNoiseFeatures[,-c(321:324)], y = CombinedBirdNetNoiseFeatures$Individual)
+  randomForest::randomForest(x = CombinedBirdNetNoiseFeatures[,-c(1025:1028)], y = CombinedBirdNetNoiseFeatures$Individual)
 
 
 1-min(ml.model.rf.BirdNetNoise.mean$err.rate[,1])
@@ -192,7 +186,7 @@ ml.model.rf.BirdNetNoise.mean <-
 
 AcousticSignals.umap <-
   umap::umap(
-    CombinedBirdNetNoiseFeatures[,-c(321:324)],
+    CombinedBirdNetNoiseFeatures[,-c(1025:1028)],
     n_neighbors = 12,
     controlscale = TRUE,
     scale = 3

@@ -83,7 +83,7 @@ write.csv(VGGishDFMeanSD,'data/VGGishDFMeanSDoriginal.csv',row.names = F)
 
 # Noise added -------------------------------------------------------------
 Tempfiles <-
-  list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-djc426@cornell.edu/.shortcut-targets-by-id/0B-Zf1l3eDDLjd2g5RHJEZlA5Sms/AllGreatCallWaveFiles/vggish_embeddings_6dB",full.names = T,
+  list.files("/Users/denaclink/Library/CloudStorage/GoogleDrive-denajane13@gmail.com/My Drive/AllGreatCallsWaveFiles6dB/vggish_embeddings_6dBupdated",full.names = T,
              recursive = T)
 
 # VGGish Mean SD ----------------------------------------------------------
