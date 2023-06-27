@@ -1,5 +1,6 @@
 library(caret)
 library(ggpubr)
+library(stringr)
 
 # Randomization MFCCs -----------------------------------------------------
 mfcc.output.df <- read.csv('data/mfcc.output.df.csv')
@@ -70,13 +71,13 @@ mean(unlist(RandomizationAccuracyMFCCNoise))
 sd(unlist(RandomizationAccuracyMFCCNoise))
 
 
-# Randomization BirdNet -----------------------------------------------------
+# Randomization BirdNET -----------------------------------------------------
 BirdNetoutput.df <- read.csv('data/CombinedBirdNetFeaturesV2.csv')
 BirdNetoutput.df$Individual <- as.factor(BirdNetoutput.df$Individual)
 
 # Randomization BirdNet 
 RandomizationAccuracyBirdNet <- list()
-for(a in 1:20){
+for(a in c(1:8,10:21)){
   set.seed(a)  
   print(a)
   TrainingN <- 0.8*nrow(BirdNetoutput.df)  
@@ -267,12 +268,12 @@ Noise <- rep('Noise Added',20)
 MFCCNoiseaccuracy <- cbind.data.frame(ClassificationAccuracy,Feature,Noise)
 
 ClassificationAccuracy <- unlist(RandomizationAccuracyBirdNet)
-Feature <- rep('BirdNet',20)
+Feature <- rep('BirdNET',20)
 Noise <- rep('No Noise Added',20)
 BirdNetaccuracy <- cbind.data.frame(ClassificationAccuracy,Feature,Noise)
 
 ClassificationAccuracy <- unlist(RandomizationAccuracyBirdNetNoise)
-Feature <- rep('BirdNet',20)
+Feature <- rep('BirdNET',20)
 Noise <- rep('Noise Added',20)
 BirdNetNoiseaccuracy <- cbind.data.frame(ClassificationAccuracy,Feature,Noise)
 
@@ -297,19 +298,31 @@ Noise <- rep('Noise Added',20)
 AcousticIndicesNoiseaccuracy <- cbind.data.frame(ClassificationAccuracy,Feature,Noise)
 
 
-CombinedFeatures <- rbind.data.frame(MFCCaccuracy,MFCCNoiseaccuracy,BirdNetaccuracy,BirdNetNoiseaccuracy,
-                                     VGGishaccuracy,VGGishNoiseaccuracy,AcousticIndicesaccuracy,AcousticIndicesNoiseaccuracy)
+CombinedFeatures <- rbind.data.frame(MFCCaccuracy,BirdNetaccuracy,
+                                     VGGishaccuracy,AcousticIndicesaccuracy)
 
 CombinedFeatures$Feature <- as.factor(CombinedFeatures$Feature)
 
 CombinedFeatures$Feature <- factor(CombinedFeatures$Feature, 
-                                   levels=c("BirdNet","MFCC","VGGish","AcousticIndices"))
+                                   levels=c("MFCC","BirdNET","VGGish","AcousticIndices"))
 
+BoxplotOriginal <- ggboxplot(data = CombinedFeatures, x='Feature',y='ClassificationAccuracy',fill='Feature',facet.by = 'Noise' )+
+  guides(fill='none')+ ylab('Classification Accuracy')+ylim(0,1)
 
-ggboxplot(data = CombinedFeatures, x='Feature',y='ClassificationAccuracy',fill='Feature',facet.by = 'Noise' )+
-  guides(fill='none')
+CombinedFeaturesNoise <- rbind.data.frame(MFCCNoiseaccuracy,BirdNetNoiseaccuracy,
+                                       VGGishNoiseaccuracy,AcousticIndicesNoiseaccuracy)
 
+CombinedFeaturesNoise$Feature <- as.factor(CombinedFeaturesNoise$Feature)
 
+CombinedFeaturesNoise$Feature <- factor(CombinedFeaturesNoise$Feature, 
+                                   levels=c("MFCC","BirdNET","VGGish","AcousticIndices"))
+
+BoxplotNoise <- ggboxplot(data = CombinedFeaturesNoise, x='Feature',y='ClassificationAccuracy',fill='Feature',facet.by = 'Noise' )+
+  guides(fill='none')+ ylab('Classification Accuracy')+ylim(0,1)
+  
+
+cowplot::plot_grid(BoxplotOriginal,BoxplotNoise,labels = c('A)','B)'), label_x = 0
+                   )
 
 
 # MFCC UMAP Plot ----------------------------------------------------------
@@ -317,7 +330,7 @@ ggboxplot(data = CombinedFeatures, x='Feature',y='ClassificationAccuracy',fill='
 AcousticSignals.umap <-
   umap::umap(mfcc.output.df[,-c(1,179)],
              #labels=as.factor(MFCC$Validation),
-             controlscale=TRUE,scale=3, n_neighbors = 5 )
+             controlscale=TRUE,scale=3, n_neighbors = 25 )
 
 plot.for.AcousticSignals <-
   cbind.data.frame(AcousticSignals.umap$layout[,1:2],mfcc.output.df$Individual)
@@ -327,13 +340,13 @@ colnames(plot.for.AcousticSignals) <-
 
 
 MFCCPercentCorrect <- 
-  round(median(unlist(RandomizationAccuracyMFCC)),3)
+  round(mean(unlist(RandomizationAccuracyMFCC)),3)
 
 
 MFCCScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                  y = "Dim.2",
                                  color='Class')+guides(color='none')+
-  scale_color_manual(values = matlab::jet.colors (length(
+  scale_color_manual(values = viridis::viridis (length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('MFCC',MFCCPercentCorrect*100, '% Correct'))
 
@@ -343,7 +356,7 @@ MFCCScatter
 AcousticSignals.umap <-
   umap::umap(mfcc.noise.output.df[,-c(1)],
              #labels=as.factor(mfcc.noise$Validation),
-             controlscale=TRUE,scale=3, n_neighbors = 5 )
+             controlscale=TRUE,scale=3, n_neighbors = 25 )
 
 plot.for.AcousticSignals <-
   cbind.data.frame(AcousticSignals.umap$layout[,1:2],mfcc.noise.output.df$Individual)
@@ -359,7 +372,7 @@ mfcc.noisePercentCorrect <-
 mfcc.noiseScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                        y = "Dim.2",
                                        color='Class')+guides(color='none')+
-  scale_color_manual(values = matlab::jet.colors (length(
+  scale_color_manual(values = viridis::viridis (length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('MFCC Noise',mfcc.noisePercentCorrect*100, '% Correct'))
 
@@ -373,7 +386,7 @@ AcousticSignals.umap <-
     BirdNetoutput.df[,-c(1025:1027)],
     n_neighbors = 12,
     controlscale = TRUE,
-    scale = 3, n_neighbors = 5
+    scale = 3, n_neighbors = 25
   )
 
 plot.for.AcousticSignals <-
@@ -387,7 +400,7 @@ plot.for.AcousticSignals$class <-
   as.factor(plot.for.AcousticSignals$class)
 
 BirdNetPercentCorrecMeant <- 
-  round(median(unlist(RandomizationAccuracyBirdNet)),3)
+  round(mean(unlist(RandomizationAccuracyBirdNet)),3)
 
 BirdNetScatterMean <- ggpubr::ggscatter(
   data = plot.for.AcousticSignals,
@@ -395,9 +408,9 @@ BirdNetScatterMean <- ggpubr::ggscatter(
   y = "Dim.2",
   color  = "class"
 ) +
-  scale_color_manual(values =  matlab::jet.colors (length(
+  scale_color_manual(values =  viridis::viridis (length(
     unique(plot.for.AcousticSignals$class)
-  ))) + guides(color="none")+ggtitle( paste('BirdNet ',BirdNetPercentCorrecMeant*100, '% Correct'))
+  ))) + guides(color="none")+ggtitle( paste('BirdNET',BirdNetPercentCorrecMeant*100, '% Correct'))
 
 BirdNetScatterMean
 
@@ -407,7 +420,7 @@ AcousticSignals.umap <-
     BirdNet.noise.output.df[,-c(1025:1027)],
     n_neighbors = 12,
     controlscale = TRUE,
-    scale = 3, n_neighbors = 5
+    scale = 3, n_neighbors = 25
   )
 
 plot.for.AcousticSignals <-
@@ -421,7 +434,7 @@ plot.for.AcousticSignals$class <-
   as.factor(plot.for.AcousticSignals$class)
 
 BirdNetNoisePercentCorrecMeant <- 
-  round(median(unlist(RandomizationAccuracyBirdNetNoise)),3)
+  round(mean(unlist(RandomizationAccuracyBirdNetNoise)),3)
 
 BirdNetNoiseScatterMean <- ggpubr::ggscatter(
   data = plot.for.AcousticSignals,
@@ -429,9 +442,9 @@ BirdNetNoiseScatterMean <- ggpubr::ggscatter(
   y = "Dim.2",
   color  = "class"
 ) +
-  scale_color_manual(values =  matlab::jet.colors (length(
+  scale_color_manual(values =  viridis::viridis (length(
     unique(plot.for.AcousticSignals$class)
-  ))) + guides(color="none")+ggtitle( paste('BirdNet Noise',BirdNetNoisePercentCorrecMeant*100, '% Correct'))
+  ))) + guides(color="none")+ggtitle( paste('BirdNET Noise',BirdNetNoisePercentCorrecMeant*100, '% Correct'))
 
 BirdNetNoiseScatterMean
 
@@ -441,41 +454,46 @@ BirdNetNoiseScatterMean
 AcousticSignals.umap <-
   umap::umap(VGGishoutput.df[,-c(129)],
              #labels=as.factor(VGGishDFMeanSD$Validation),
-             controlscale=TRUE,scale=3, n_neighbors = 5)
+             controlscale=TRUE,scale=3, n_neighbors = 25)
 
 plot.for.AcousticSignals <-
-  cbind.data.frame(AcousticSignals.umap$layout[,1:2],VGGishDFMeanSD$Individual)
+  cbind.data.frame(AcousticSignals.umap$layout[,1:2],VGGishoutput.df$Individual)
 
 colnames(plot.for.AcousticSignals) <-
   c("Dim.1", "Dim.2","Class")
 
 VGGishPercentCorrect <- 
-  round( median( unlist(RandomizationAccuracyVGGish)),3)
+  round( mean( unlist(RandomizationAccuracyVGGish)),3)
 
 VGGishScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                    y = "Dim.2",
                                    color='Class')+guides(color='none')+
-  scale_color_manual(values = matlab::jet.colors (length(
+  scale_color_manual(values = viridis::viridis (length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('VGGish',VGGishPercentCorrect*100, '% Correct'))
 
 VGGishScatter
 
 
+AcousticSignals.umap <-
+  umap::umap(VGGish.noise.output.df[,-c(129)],
+             #labels=as.factor(VGGishDFMeanSD$Validation),
+             controlscale=TRUE,scale=3, n_neighbors = 25)
+
 plot.for.AcousticSignals <-
-  cbind.data.frame(AcousticSignals.umap$layout[,1:2],VGGishDFNoiseMeanSD$Individual)
+  cbind.data.frame(AcousticSignals.umap$layout[,1:2],VGGish.noise.output.df$Individual)
 
 colnames(plot.for.AcousticSignals) <-
   c("Dim.1", "Dim.2","Class")
 
 VGGishNoisePercentCorrect <- 
- round( median( unlist(RandomizationAccuracyVGGishNoise)),3)
+ round( mean( unlist(RandomizationAccuracyVGGishNoise)),3)
 
 
 VGGishScatterNoise <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                         y = "Dim.2",
                                         color='Class')+guides(color='none')+
-  scale_color_manual(values =  matlab::jet.colors (length(
+  scale_color_manual(values =  viridis::viridis (length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('VGGish Noise',VGGishNoisePercentCorrect*100, '% Correct'))
 
@@ -486,7 +504,7 @@ VGGishScatterNoise
 
 AcousticSignals.umap <-
   umap::umap(AcousticIndicesoutput.df[,-c(6)],
-             controlscale=TRUE,scale=3, n_neighbors = 5)
+             controlscale=TRUE,scale=3, n_neighbors = 25)
 
 plot.for.AcousticSignals <-
   cbind.data.frame(AcousticSignals.umap$layout[,1:2],AcousticIndicesoutput.df$Individual)
@@ -496,13 +514,13 @@ colnames(plot.for.AcousticSignals) <-
 
 
 AcousticIndicesPercentCorrect <- 
-  round( median(unlist(RandomizationAccuracyAcousticIndices)),3)
+  round( mean(unlist(RandomizationAccuracyAcousticIndices)),3)
 
 
 AcousticIndicesScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                             y = "Dim.2",
                                             color='Class')+guides(color='none')+
-  scale_color_manual(values =matlab::jet.colors(length(
+  scale_color_manual(values =viridis::viridis(length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('Acoustic Indices',AcousticIndicesPercentCorrect*100, '% Correct'))
 
@@ -512,7 +530,7 @@ AcousticIndicesScatter
 ## Noise
 AcousticSignals.umap <-
   umap::umap(AcousticIndices.noise.output.df[,-c(6)],
-             controlscale=TRUE,scale=3, n_neighbors = 5)
+             controlscale=TRUE,scale=3, n_neighbors = 25)
 
 plot.for.AcousticSignals <-
   cbind.data.frame(AcousticSignals.umap$layout[,1:2],AcousticIndices.noise.output.df$Individual)
@@ -522,13 +540,13 @@ colnames(plot.for.AcousticSignals) <-
 
 
 AcousticIndicesNoisePercentCorrect <- 
-  round( median(unlist(RandomizationAccuracyAcousticIndicesNoise)),3)
+  round( mean(unlist(RandomizationAccuracyAcousticIndicesNoise)),3)
 
 
 AcousticIndicesNoiseScatter <- ggpubr::ggscatter(data = plot.for.AcousticSignals,x = "Dim.1",
                                             y = "Dim.2",
                                             color='Class')+guides(color='none')+
-  scale_color_manual(values = matlab::jet.colors (length(
+  scale_color_manual(values = viridis::viridis (length(
     unique(plot.for.AcousticSignals$Class)
   ))) + guides(color="none")+ggtitle( paste('Acoustic Indices',AcousticIndicesNoisePercentCorrect*100, '% Correct'))
 
@@ -537,16 +555,117 @@ AcousticIndicesNoiseScatter
 
 # Combine all plots together ----------------------------------------------
 
-cowplot::plot_grid( BirdNetScatterMean,
-                    MFCCScatter,
+cowplot::plot_grid(MFCCScatter,
+                   BirdNetScatterMean,
                    VGGishScatter,
                    AcousticIndicesScatter,
-                   nrow = 2)
+                   nrow = 2,
+                   labels = c('A)','B)','C)','D)'),
+                   label_x = 0)
 
 
-cowplot::plot_grid(BirdNetNoiseScatterMean,
-                   mfcc.noiseScatter,
+cowplot::plot_grid(mfcc.noiseScatter,
+                   BirdNetNoiseScatterMean,
                    VGGishScatterNoise,
                    AcousticIndicesNoiseScatter,
-                   nrow = 2)
+                   nrow = 2,
+                   labels = c('A)','B)','C)','D)'),
+                   label_x = 0)
 
+
+# Site-level plots --------------------------------------------------------
+AcousticSignalsMFCC.umap <-
+  umap::umap( mfcc.noise.output.df[,-c(1,179)],
+              controlscale=TRUE,scale=3, n_neighbors = 25)
+
+plot.for.AcousticSignalsMFCC <-
+  cbind.data.frame(AcousticSignalsMFCC.umap$layout[,1:2],mfcc.noise.output.df$Individual)
+
+colnames(plot.for.AcousticSignalsMFCC) <-
+  c("Dim.1", "Dim.2","Class")
+
+plot.for.AcousticSignalsMFCC$Site <- str_split_fixed(plot.for.AcousticSignalsMFCC$Class,pattern = '_',n=2)[,1]
+plot.for.AcousticSignalsMFCC$Site  <- substr(plot.for.AcousticSignalsMFCC$Site, start=1,stop=2)
+plot.for.AcousticSignalsMFCC$Site  <- recode_factor(plot.for.AcousticSignalsMFCC$Site, VJ = "SA")
+
+plot.for.AcousticSignalsMFCC$Site  <- factor(plot.for.AcousticSignalsMFCC$Site, levels=c( "CR", "DK", "DV", "IC", "KB", "MB","SA"))
+
+MFCCSite <-ggpubr::ggscatter(data = plot.for.AcousticSignalsMFCC,x = "Dim.1",
+                  y = "Dim.2",
+                  color='Site',alpha=0.25)+
+  scale_color_manual(values = viridis::viridis (length(unique(plot.for.AcousticSignalsMFCC$Site)))) +ggtitle( ('MFCC by Site'))
+
+
+AcousticSignalsBirdNET.umap <-
+  umap::umap( BirdNet.noise.output.df[,-c(1025:1027)],
+             controlscale=TRUE,scale=3, n_neighbors = 25)
+
+plot.for.AcousticSignalsBirdNET <-
+  cbind.data.frame(AcousticSignalsBirdNET.umap$layout[,1:2],BirdNet.noise.output.df$Individual)
+
+colnames(plot.for.AcousticSignalsBirdNET) <-
+  c("Dim.1", "Dim.2","Class")
+
+plot.for.AcousticSignalsBirdNET$Site <- str_split_fixed(plot.for.AcousticSignalsBirdNET$Class,pattern = '_',n=2)[,1]
+plot.for.AcousticSignalsBirdNET$Site  <- substr(plot.for.AcousticSignalsBirdNET$Site, start=1,stop=2)
+plot.for.AcousticSignalsBirdNET$Site  <- recode_factor(plot.for.AcousticSignalsBirdNET$Site, VJ = "SA")
+
+plot.for.AcousticSignalsBirdNET$Site  <- factor(plot.for.AcousticSignalsBirdNET$Site, levels=c( "CR", "DK", "DV", "IC", "KB", "MB","SA"))
+
+BirdNETsite <- ggpubr::ggscatter(data = plot.for.AcousticSignalsBirdNET,x = "Dim.1",
+                  y = "Dim.2",
+                  color='Site',alpha=0.25)+
+  scale_color_manual(values = viridis::viridis (length(unique(plot.for.AcousticSignalsBirdNET$Site)))) +ggtitle( ('BirdNET by Site'))
+
+
+AcousticSignalsVGGish.umap <-
+  umap::umap( VGGish.noise.output.df[,-c(129)],
+              controlscale=TRUE,scale=3, n_neighbors = 25)
+
+plot.for.AcousticSignalsVGGish <-
+  cbind.data.frame(AcousticSignalsVGGish.umap$layout[,1:2],VGGish.noise.output.df$Individual)
+
+colnames(plot.for.AcousticSignalsVGGish) <-
+  c("Dim.1", "Dim.2","Class")
+
+plot.for.AcousticSignalsVGGish$Site <- str_split_fixed(plot.for.AcousticSignalsVGGish$Class,pattern = '_',n=2)[,1]
+plot.for.AcousticSignalsVGGish$Site  <- substr(plot.for.AcousticSignalsVGGish$Site, start=1,stop=2)
+plot.for.AcousticSignalsVGGish$Site  <- recode_factor(plot.for.AcousticSignalsVGGish$Site, VJ = "SA")
+
+plot.for.AcousticSignalsVGGish$Site  <- factor(plot.for.AcousticSignalsVGGish$Site, levels=c( "CR", "DK", "DV", "IC", "KB", "MB","SA"))
+
+VGGishsite <- ggpubr::ggscatter(data = plot.for.AcousticSignalsVGGish,x = "Dim.1",
+                  y = "Dim.2",
+                  color='Site',alpha=0.25)+
+  scale_color_manual(values = viridis::viridis (length(unique(plot.for.AcousticSignalsVGGish$Site)))) +ggtitle( ('VGGish by Site'))
+
+
+AcousticSignalsIndices.umap <-
+  umap::umap(AcousticIndicesoutput.df[,-c(6)],
+             controlscale=TRUE,scale=3, n_neighbors = 25)
+
+plot.for.AcousticSignalsIndices <-
+  cbind.data.frame(AcousticSignalsIndices.umap$layout[,1:2],AcousticIndices.noise.output.df$Individual)
+
+colnames(plot.for.AcousticSignalsIndices) <-
+  c("Dim.1", "Dim.2","Class")
+
+plot.for.AcousticSignalsIndices$Site <- str_split_fixed(plot.for.AcousticSignalsIndices$Class,pattern = '_',n=2)[,1]
+plot.for.AcousticSignalsIndices$Site  <- substr(plot.for.AcousticSignalsIndices$Site, start=1,stop=2)
+plot.for.AcousticSignalsIndices$Site  <- recode_factor(plot.for.AcousticSignalsIndices$Site, VJ = "SA")
+
+plot.for.AcousticSignalsIndices$Site  <- factor(plot.for.AcousticSignalsIndices$Site, levels=c( "CR", "DK", "DV", "IC", "KB", "MB","SA"))
+
+IndiceSite <- ggpubr::ggscatter(data = plot.for.AcousticSignalsIndices,x = "Dim.1",
+                  y = "Dim.2",
+                  color='Site',alpha=0.25)+
+  scale_color_manual(values = viridis::viridis (length(unique(plot.for.AcousticSignalsIndices$Site)))) +ggtitle( ('Acoustic IndicesNoise by Site'))
+
+
+cowplot::plot_grid(MFCCSite,
+                   BirdNETsite,
+                   VGGishsite,
+                   IndiceSite,
+                   nrow = 2,
+                   labels = c('A)','B)','C)','D)'),
+                   label_x = 0)

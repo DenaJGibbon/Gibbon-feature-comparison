@@ -65,7 +65,7 @@ CombinedBirdNetFeatures$Individual <- as.factor(CombinedBirdNetFeatures$Individu
 (unique(CombinedBirdNetFeatures$Individual))
 
 ml.model.rf.birdnet.mean <-
-  randomForest::randomForest(x = CombinedBirdNetFeatures[,-c(1025:1028)], y = CombinedBirdNetFeatures$Individual)
+  randomForest::randomForest(x = CombinedBirdNetFeatures[,-c(1025:1027)], y = CombinedBirdNetFeatures$Individual)
 
 
 1-min(ml.model.rf.birdnet.mean$err.rate[,1])
@@ -73,7 +73,7 @@ ml.model.rf.birdnet.mean <-
 
 AcousticSignals.umap <-
   umap::umap(
-    CombinedBirdNetFeatures[,-c(1025:1028)],
+    CombinedBirdNetFeatures[,-c(1025:1027)],
     n_neighbors = 12,
     controlscale = TRUE,
     scale = 3
@@ -178,7 +178,7 @@ CombinedBirdNetNoiseFeatures$Individual <- as.factor(CombinedBirdNetNoiseFeature
 (unique(CombinedBirdNetNoiseFeatures$Individual))
 
 ml.model.rf.BirdNetNoise.mean <-
-  randomForest::randomForest(x = CombinedBirdNetNoiseFeatures[,-c(1025:1028)], y = CombinedBirdNetNoiseFeatures$Individual)
+  randomForest::randomForest(x = CombinedBirdNetNoiseFeatures[,-c(1025:1027)], y = CombinedBirdNetNoiseFeatures$Individual)
 
 
 1-min(ml.model.rf.BirdNetNoise.mean$err.rate[,1])
@@ -186,7 +186,7 @@ ml.model.rf.BirdNetNoise.mean <-
 
 AcousticSignals.umap <-
   umap::umap(
-    CombinedBirdNetNoiseFeatures[,-c(1025:1028)],
+    CombinedBirdNetNoiseFeatures[,-c(1025:1027)],
     n_neighbors = 12,
     controlscale = TRUE,
     scale = 3
@@ -219,6 +219,6 @@ BirdNetNoiseScatterMean <- ggpubr::ggscatter(
 
 BirdNetNoiseScatterMean
 
-write.csv(CombinedBirdNetNoiseFeatures,'data/CombinedBirdNetNoiseFeatures.csv',row.names = F)
+write.csv(CombinedBirdNetNoiseFeatures,'data/CombinedBirdNetNoiseFeaturesV2.csv',row.names = F)
 
 
