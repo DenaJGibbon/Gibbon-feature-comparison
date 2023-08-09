@@ -4,23 +4,12 @@
 library(tuneR)
 library(seewave)
 library(ggplot2)
-library(zoo)
-library(plotrix)
+library(ggpubr)
 library(plyr)
 library(stringr)
-library(lme4)
-library(usdm)
-library(bbmle)
-library(MuMIn)
-library(gridExtra)
-library(lattice)
-library(quantreg)
-library(MASS)
-library(car)
-library(viridis)
 
 
-#### Part 2 Signal-to-noise ratio calculation ####
+#### Signal-to-noise ratio calculation ####
 
 # Create index of calls for the loop
 input.dir.new <- "/Volumes/DJC 1TB/VocalIndividualityClips/SoundFilesSNR"
@@ -99,7 +88,7 @@ for( i in 1:length(uniqueRecorderInfo) ){
       great.call <- gsub(".wav", "", great.call)
       
       # Add to list of noise values
-      file_name <- paste('snr_df48kHz/', uniqueRecorderInfo[i], '_snrdf.csv', sep='')
+      file_name <- paste('snr_df/', uniqueRecorderInfo[i], '_snrdf.csv', sep='')
       recorder <- uniqueRecorderInfo[i]
       wavname <- snr.file
       temprow <- cbind.data.frame(great.call, SNR.dB, recorder, wavname)
@@ -112,7 +101,7 @@ for( i in 1:length(uniqueRecorderInfo) ){
 }
 
 
-SNR_file_names <- dir('snr_df48kHz/', full.names = T) # Directory containing the saved SNR files
+SNR_file_names <- dir('snr_df/', full.names = T) # Directory containing the saved SNR files
 
 # Read all SNR files and combine them into a single data frame
 AllPlaybacksSNR <- do.call(rbind, lapply(SNR_file_names, read.csv))
@@ -128,5 +117,4 @@ levels(AllPlaybacksSNR$Recorder) <- c('M1 (0 m)', 'M2 (50 m)', 'M3 (100 m)', 'M4
 
 # Create boxplots for SNR analysis
 ggboxplot(data = AllPlaybacksSNR, x = 'Recorder', y = "SNR.dB", outlier.shape = NA) + ylab('SNR (dB re 20 μPa)')
-ggboxplot(data = AllPlaybacksSNR, x = 'Recorder', fill = 'time', y = "SNR.dB", outlier.shape = NA) + ylab('SNR (dB re 20 μPa)')
 
