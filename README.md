@@ -66,17 +66,10 @@ publication.
 
 ``` r
 library(ggpubr)
-#> Loading required package: ggplot2
 library(umap)
 library(stringr)
 library(cowplot)
-#> 
-#> Attaching package: 'cowplot'
-#> The following object is masked from 'package:ggpubr':
-#> 
-#>     get_legend
 library(viridis)
-#> Loading required package: viridisLite
 
 # Plotting randomization results -------------------------------------------------
 

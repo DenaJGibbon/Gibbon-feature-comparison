@@ -42,7 +42,7 @@ Use the 'Randomization for playbacks.R' script to randomly divide data for each 
 # Creating plots for publication
 See 'Script to recreate figures.R' to recreate all figures in publication.
 
-```{r,messages=FALSE}
+```{r,message=FALSE}
 library(ggpubr)
 library(umap)
 library(stringr)
