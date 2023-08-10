@@ -1,4 +1,4 @@
-# Follow installation insturctions: https://github.com/tensorflow/models/blob/master/research/audioset/vggish/README.md
+# Follow installation instructions: https://github.com/tensorflow/models/blob/master/research/audioset/vggish/README.md
 
 # All this needs to be run from the terminal after following the installation instructions
 

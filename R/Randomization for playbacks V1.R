@@ -7,12 +7,15 @@ library(caret)
 library(dbscan)
 library(aricode)
 
-# V1 removes duration as a feature
-# Note for apcluster used default q
+# NOTE: code is currently set to run affinity propagation clustering, to run 'hdbscan' uncomment 
+# TempCluster <- hdbscan(AcousticSignals.umap$layout[,1:2], minPts = 20) for all feature types
+# When using apcluster use 'CTRL + F' to replace 'TempCluster$cluster' with 'TempCluster@idx' 
+# When using hdbscan use 'CTRL + F' to replace 'TempCluster@idx' with 'TempCluster$cluster'
+
 # MFCC Randomization ------------------------------------------------------
 
 # Read MFCCPlaybacks.csv
-MFCCPlaybacks <- read.csv('data/MFCCPlaybacks.csv')
+MFCCPlaybacks <- read.csv('data/features/MFCCPlaybacks.csv')
 
 # Extract the recorder information from the 'Recording' column
 MFCCPlaybacks$Recorder <- str_split_fixed(MFCCPlaybacks$Recording, pattern = '_', n = 2)[, 1]
@@ -88,7 +91,7 @@ for (a in 1:length(UniqueRecorderMFCC)) {
 
 # BirdNET Randomization ------------------------------------------------------
 # Read BirdNETPlaybacks.csv
-file_names <- dir('data/BirdNET/', full.names = T) #where you have your files
+file_names <- dir('data/features/BirdNET', full.names = T) #where you have your files
 
 BirdNETPlaybacks <- do.call(rbind,lapply(file_names,read.csv))
 
@@ -167,7 +170,7 @@ for (a in 1:length(UniqueRecorderBirdNET)) {
 
 # VGGish Randomization ------------------------------------------------------
 # Read VGGishPlaybacks.csv
-file_names <- dir('data/VGGish/', full.names = T)#where you have your files
+file_names <- dir('data/features/VGGish/', full.names = T)#where you have your files
 
 VGGishPlaybacks <- do.call(rbind,lapply(file_names,read.csv))
 
@@ -246,7 +249,7 @@ for (a in 1:length(UniqueRecorderVGGish)) {
 # wav2vec2 Randomization ------------------------------------------------------
 
 # Read wav2vec2Playbacks.csv
-wav2vec2Playbacks <- read.csv('data/wav2vecmeansdDFPlayback.csv')
+wav2vec2Playbacks <- read.csv('data/features/wav2vecmeansdDFPlayback.csv')
 
 # Extract the recorder information from the 'Recording' column
 wav2vec2Playbacks$Recorder <- str_split_fixed(wav2vec2Playbacks$RecorderID, pattern = '_', n = 2)[, 1]
@@ -323,7 +326,7 @@ for (a in 1:length(UniqueRecorderwav2vec2)) {
 # AcousticIndices Randomization ------------------------------------------------------
 
 # Read AcousticIndicesPlaybacks.csv
-AcousticIndicesPlaybacks <- read.csv('data/AcousticIndicesDFPlayback.csv')
+AcousticIndicesPlaybacks <- read.csv('data/features/AcousticIndicesDFPlayback.csv')
 
 # Extract the recorder information from the 'Recording' column
 AcousticIndicesPlaybacks$Recorder <- str_split_fixed(AcousticIndicesPlaybacks$RecorderID, pattern = '_', n = 2)[, 1]
@@ -397,165 +400,3 @@ for (a in 1:length(UniqueRecorderAcousticIndices)) {
 }
 
 
-# Plots for randomization -------------------------------------------------
-
-# Load required libraries
-library(ggplot2)
-library(cowplot)
-library(viridis)
-
-# Load and process data from the 'data/randomization_hdbscan/' directory
-file_names <- dir('data/randomization_hdbscan/', full.names = TRUE) # List all file names in the directory
-
-# Combine data from all files into a single data frame using read.csv and do.call(rbind, ...)
-AllPlaybacksRand <- do.call(rbind, lapply(file_names, read.csv))
-
-# Convert 'AccuracyVal' column to percentage scale
-AllPlaybacksRand$AccuracyVal <- AllPlaybacksRand$AccuracyVal * 100
-
-# Convert factors for 'Recorder' and 'Features' columns to meaningful labels
-AllPlaybacksRand$Recorder <- as.factor(AllPlaybacksRand$Recorder)
-levels(AllPlaybacksRand$Recorder) <- c('M1 (0 m)', 'M2 (50 m)', 'M3 (100 m)', 'M4 (150 m)',
-                                       'M5 (200 m)', 'M6 (250 m)', 'M7 (300 m)')
-
-AllPlaybacksRand$Features <- as.factor(AllPlaybacksRand$Features)
-levels(AllPlaybacksRand$Features) <- c('Acoustic Indices', 'BirdNET', 'MFCCs',
-                                       'VGGish', 'Wav2Vec2')
-
-# Create ggplot2 plot 'PlotA' for Classification Accuracy by Features and Recorder
-PlotA <- ggboxplot(data = AllPlaybacksRand,
-                   color = 'Recorder', fill = 'Recorder', y = 'AccuracyVal', x = 'Features') +
-  scale_color_manual(values = viridis::viridis(7)) +
-  scale_fill_manual(values = viridis::viridis(7)) +
-  ylab('Classification Accuracy')
-
-# Create ggplot2 plot 'PlotBHDBSCAN' for Normalized Mutual Information (HDBSCAN) by Features and Recorder
-PlotBHDBSCAN <- ggboxplot(data = AllPlaybacksRand,
-                          color = 'Recorder', fill = 'Recorder', y = 'NMI.val', x = 'Features') +
-  scale_color_manual(values = viridis::viridis(7)) +
-  scale_fill_manual(values = viridis::viridis(7)) +
-  ylab('Normalized Mutual Information (HDBSCAN)')
-
-# Calculate the deviation between 'N.Individual' and 'N.cluster' columns and add it as 'Deviation' column
-AllPlaybacksRand$Deviation <- AllPlaybacksRand$N.Individual - AllPlaybacksRand$N.cluster
-
-# Create ggplot2 plot 'PlotCHDBSCAN' for Number of Clusters (HDBSCAN) by Features and Recorder
-PlotCHDBSCAN <- ggboxplot(data = AllPlaybacksRand,
-                          color = 'Recorder', fill = 'Recorder', y = 'N.cluster', x = 'Features', outlier.shape = NA) +
-  scale_color_manual(values = viridis::viridis(7)) +
-  scale_fill_manual(values = viridis::viridis(7)) +
-  ylab('Number of clusters (HDBSCAN)') +
-  geom_hline(yintercept = 12, linetype = 'dashed') + ylim(0, 25) + xlab('')
-
-# Create a cowplot grid with PlotA and PlotB, labeled as 'A' and 'B', respectively, in 2 rows
-cowplot::plot_grid(PlotA, PlotBHDBSCAN, labels = c('A', 'B'), nrow = 2, label_x = 0.95)
-
-# Repeat the process for the 'data/randomization_affinity/' directory
-file_names <- dir('data/randomization_affinity/', full.names = TRUE)
-AllPlaybacksRand <- do.call(rbind, lapply(file_names, read.csv))
-AllPlaybacksRand$AccuracyVal <- AllPlaybacksRand$AccuracyVal * 100
-AllPlaybacksRand$Recorder <- as.factor(AllPlaybacksRand$Recorder)
-levels(AllPlaybacksRand$Recorder) <- c('M1 (0 m)', 'M2 (50 m)', 'M3 (100 m)', 'M4 (150 m)',
-                                       'M5 (200 m)', 'M6 (250 m)', 'M7 (300 m)')
-AllPlaybacksRand$Features <- as.factor(AllPlaybacksRand$Features)
-levels(AllPlaybacksRand$Features) <- c('Acoustic Indices', 'BirdNET', 'MFCCs',
-                                       'VGGish', 'Wav2Vec2')
-
-# Create ggplot2 plot 'PlotBaffinity' for Normalized Mutual Information (affinity) by Features and Recorder
-PlotBaffinity <- ggboxplot(data = AllPlaybacksRand,
-                           color = 'Recorder', fill = 'Recorder', y = 'NMI.val', x = 'Features') +
-  scale_color_manual(values = viridis::viridis(7)) +
-  scale_fill_manual(values = viridis::viridis(7)) +
-  ylab('Normalized Mutual Information (affinity)') + xlab('')
-
-# Calculate the deviation between 'N.Individual' and 'N.cluster' columns and add it as 'Deviation' column
-AllPlaybacksRand$Deviation <- AllPlaybacksRand$N.Individual - AllPlaybacksRand$N.cluster
-
-# Create ggplot2 plot 'PlotCaffinity' for Number of Clusters (affinity) by Features and Recorder
-PlotCaffinity <- ggboxplot(data = AllPlaybacksRand,
-                           color = 'Recorder', fill = 'Recorder', y = 'N.cluster', x = 'Features', outlier.shape = NA) +
-  scale_color_manual(values = viridis::viridis(7)) +
-  scale_fill_manual(values = viridis::viridis(7)) +
-  ylab('Number of clusters (affinity)') +
-  geom_hline(yintercept = 12, linetype = 'dashed') + ylim(0, 25) + xlab('')
-
-# Create a cowplot grid with PlotBaffinity and PlotBHDBSCAN, labeled as 'A' and 'B', respectively, in 2 rows
-cowplot::plot_grid(PlotBaffinity, PlotBHDBSCAN, labels = c('A', 'B'), nrow = 2, label_x = 0.95)
-
-# Create a cowplot grid with PlotCaffinity and PlotCHDBSCAN, labeled as 'A' and 'B', respectively, in 2 rows
-cowplot::plot_grid(PlotCaffinity, PlotCHDBSCAN, labels = c('A', 'B'), nrow = 2, label_x = 0.95)
-
-
-# Summary table of performance --------------------------------------------------
-library(ggplot2)
-library(cowplot)
-library(viridis)
-library(dplyr)
-library(kableExtra)
-
-# Load and process data from the 'data/randomization_hdbscan/' directory
-file_names <- dir('data/randomization_hdbscan/', full.names = TRUE) # List all file names in the directory
-
-# Combine data from all files into a single data frame using read.csv and do.call(rbind, ...)
-AllPlaybacksRand <- do.call(rbind, lapply(file_names, read.csv))
-
-# Number of unique playbacks (No plot or table generated for this section)
-uniquepd <- str_split_fixed(MFCCPlaybacks$Recording, pattern = '_', n = 2)[, 2]
-uniquepd <- substr((uniquepd), 1, 13)
-unique(uniquepd)
-
-# Calculate the mean and standard deviation by feature type and recorder distance
-summary_data <- AllPlaybacksRand %>%
-  group_by(Features, Recorder) %>%
-  summarise(mean_value = mean(AccuracyVal, na.rm = TRUE),
-            sd_value = sd(AccuracyVal, na.rm = TRUE), .groups = "drop") %>%
-  arrange(desc(mean_value)) # Order the table by recorder_distance
-
-# Create the kable table with custom font
-my_table <- kable(summary_data) %>%
-  kable_styling()
-
-my_table
-
-# Save the kable table as a PDF file named 'summary_data.pdf'
-kableExtra::save_kable(my_table, file = 'Table 1 Online Supporting Material.pdf')
-
-
-
-
-# Random forest features --------------------------------------------------
-
-library(readxl)
-library(dplyr)
-library(ggplot2)
-library(randomForest)
-library(varImp)
-
-
-# Read AcousticIndicesPlaybacks.csv
-AcousticIndicesPlaybacks <- read.csv('data/AcousticIndicesDFPlayback.csv')
-
-# Extract the recorder information from the 'Recording' column
-AcousticIndicesPlaybacks$Recorder <- str_split_fixed(AcousticIndicesPlaybacks$RecorderID, pattern = '_', n = 2)[, 1]
-
-# Get unique recorders
-UniqueRecorderAcousticIndices <- unique(AcousticIndicesPlaybacks$Recorder)
-
-# Convert 'Individual' column to a factor
-AcousticIndicesPlaybacks$Individual <- as.factor(AcousticIndicesPlaybacks$Individual)
-
-#Random Forest Modelling
-model <- randomForest::randomForest(
-  x = AcousticIndicesPlaybacks[, -c(5:8)],
-  y = AcousticIndicesPlaybacks$Individual,
-  ntree = 500,
-  random_state = 0,
-  importance = TRUE
-)
-
-
-#Evaluate variable importance
-importance(model)
-varImpPlot(model)
-
-ggpubr::ggbarplot(data=AcousticIndicesPlaybacks,x='Individual',y='ACI')

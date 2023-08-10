@@ -18,20 +18,24 @@ publication were done in R.
 
 ### MFCCs
 
-MFCCs are calculated using the ‘Processing features for randomization’ R
-script.
+MFCCs are calculated using the ‘Processing features for randomization.R’
+R script.
 
 ### BirdNET
 
 Follow the installation instructions here:
 <https://github.com/kahst/BirdNET-Analyzer>. Then use the ‘BirdNET
-Terminal Script’.
+Terminal Script’. Then run the ‘Processing features for randomization.R’
+R script to convert BirdNET embeddings into the format needed for
+analyses.
 
 ### VGGish
 
 Follow installation instructions:
 <https://github.com/tensorflow/models/blob/master/research/audioset/vggish/README.md>.
-Then use the ‘VGGish Terminal Script’.
+Then use the ‘VGGish Terminal Script’. Then run the ‘Processing features
+for randomization.R’ R script to convert VGGish embeddings into the
+format needed for analyses.
 
 ### Wav2Vec2
 
@@ -41,8 +45,16 @@ Python script.
 ### Acoustic indices
 
 Acoustic indices are calculated using the ‘Processing features for
-randomization’ R script.
+randomization.R’ R script.
 
 # SNR calculation
 
+SNR calculation is done on sound clips that have an extra 2-s on either
+side of the call using the ‘SNR Calculation’ R script.
+
 # Supervised classification and unsupervised clustering
+
+Use the ‘Randomization for playbacks.R’ script to randomly divide data
+for each feature and distance category using a 80/20 split. This script
+uses the processed data for each feature located in the ‘data/features’
+folder.

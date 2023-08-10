@@ -101,7 +101,7 @@ for( i in 1:length(uniqueRecorderInfo) ){
 }
 
 
-SNR_file_names <- dir('snr_df/', full.names = T) # Directory containing the saved SNR files
+SNR_file_names <- dir('data/snr_df/', full.names = T) # Directory containing the saved SNR files
 
 # Read all SNR files and combine them into a single data frame
 AllPlaybacksSNR <- do.call(rbind, lapply(SNR_file_names, read.csv))
