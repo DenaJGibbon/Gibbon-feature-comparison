@@ -491,7 +491,6 @@ library(ggplot2)
 library(cowplot)
 library(viridis)
 library(dplyr)
-library(kable)
 library(kableExtra)
 
 # Load and process data from the 'data/randomization_hdbscan/' directory
@@ -519,15 +518,8 @@ my_table <- kable(summary_data) %>%
 my_table
 
 # Save the kable table as a PDF file named 'summary_data.pdf'
-#kableExtra::save_kable(my_table, file = 'summary_data.pdf')
+kableExtra::save_kable(my_table, file = 'Table 1 Online Supporting Material.pdf')
 
-# Add table formatting (optional, customize as needed)
-my_table <- kable_styling(my_table, full_width = FALSE, latex_options = "hold_position", font_size = )
-
-# Display the summary_data table with HTML formatting and font size of 7
-summary_data %>%
-  kable("html") %>%
-  kable_styling(font_size = 7)
 
 
 

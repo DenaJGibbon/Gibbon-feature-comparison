@@ -11,16 +11,38 @@ different approaches of feature extraction for individual discrimination
 of gibbon female calls. Acoustic data can be downloaded at:
 10.5281/zenodo.8205685.
 
-Analyses were done in both R and Python.
+Feature extraction was done in both R and Python, and analyses for
+publication were done in R.
 
-## Feature/embedding extraction
+# Feature/embedding extraction
 
 ### MFCCs
 
+MFCCs are calculated using the ‘Processing features for randomization’ R
+script.
+
 ### BirdNET
+
+Follow the installation instructions here:
+<https://github.com/kahst/BirdNET-Analyzer>. Then use the ‘BirdNET
+Terminal Script’.
 
 ### VGGish
 
+Follow installation instructions:
+<https://github.com/tensorflow/models/blob/master/research/audioset/vggish/README.md>.
+Then use the ‘VGGish Terminal Script’.
+
 ### Wav2Vec2
 
+Wav2Vec2 embeddings are caluclated using the ‘Wav2Vec2_Features.py’
+Python script.
+
 ### Acoustic indices
+
+Acoustic indices are calculated using the ‘Processing features for
+randomization’ R script.
+
+# SNR calculation
+
+# Supervised classification and unsupervised clustering
