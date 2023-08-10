@@ -8,13 +8,17 @@ outperform embeddings from pre-trained convolutional neural networks
 under noisy conditions for discrimination tasks of individual gibbons’
 (Lakdari et al, under review). The goal of the paper is to compare
 different approaches of feature extraction for individual discrimination
-of gibbon female calls. Acoustic data can be downloaded at:
-10.5281/zenodo.8205685.
+of gibbon female calls.
 
 Feature extraction was done in both R and Python, and analyses for
 publication were done in R.
 
-# Feature/embedding extraction
+# Data availability
+
+Acoustic data can be downloaded at: 10.5281/zenodo.8205685. Processed
+data can be found in the ‘data/features’ folder.
+
+# Feature/embedding extraction on the audio data
 
 ### MFCCs
 
@@ -47,12 +51,12 @@ Python script.
 Acoustic indices are calculated using the ‘Processing features for
 randomization.R’ R script.
 
-# SNR calculation
+# SNR calculation on audio data
 
 SNR calculation is done on sound clips that have an extra 2-s on either
 side of the call using the ‘SNR Calculation’ R script.
 
-# Supervised classification and unsupervised clustering
+# Supervised classification and unsupervised clustering of processed data
 
 Use the ‘Randomization for playbacks.R’ script to randomly divide data
 for each feature and distance category using a 80/20 split. This script

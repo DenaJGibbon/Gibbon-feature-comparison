@@ -101,20 +101,4 @@ for( i in 1:length(uniqueRecorderInfo) ){
 }
 
 
-SNR_file_names <- dir('data/snr_df/', full.names = T) # Directory containing the saved SNR files
-
-# Read all SNR files and combine them into a single data frame
-AllPlaybacksSNR <- do.call(rbind, lapply(SNR_file_names, read.csv))
-
-# Extract time information from great.call column
-AllPlaybacksSNR$time <- str_split_fixed(AllPlaybacksSNR$great.call, pattern='_', n=4)[, 3]
-AllPlaybacksSNR$time <- substr(AllPlaybacksSNR$time, 1, 4)
-
-# Convert Recorder column to factor and relabel levels
-AllPlaybacksSNR$Recorder <- as.factor(AllPlaybacksSNR$recorder)
-levels(AllPlaybacksSNR$Recorder) <- c('M1 (0 m)', 'M2 (50 m)', 'M3 (100 m)', 'M4 (150 m)',
-                                      'M5 (200 m)', 'M6 (250 m)', 'M7 (300 m)')
-
-# Create boxplots for SNR analysis
-ggboxplot(data = AllPlaybacksSNR, x = 'Recorder', y = "SNR.dB", outlier.shape = NA) + ylab('SNR (dB re 20 μPa)')
 
