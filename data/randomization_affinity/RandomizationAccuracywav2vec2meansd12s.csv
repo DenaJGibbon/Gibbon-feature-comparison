@@ -1,0 +1,3 @@
+"","AccuracyVal","Recorder","Features","N.cluster","N.Individual","NMI.val"
+"Accuracy",0.46551724137931,"M1","wav2vec2",24,12,0.0671687920502596
+"Accuracy1",0.392241379310345,"M1","wav2vec2",26,12,0.0641125841650975
