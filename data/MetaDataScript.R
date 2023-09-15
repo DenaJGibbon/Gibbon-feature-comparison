@@ -1,0 +1,56 @@
+library(knitr)
+library(kableExtra)
+
+Datafiles <- list.files('data',full.names = T)
+
+
+# Metadata table 1 --------------------------------------------------------
+
+# File name
+file_name <- Datafiles[1]
+
+# Create a data frame for metadata
+metadata_df1 <- data.frame(
+  FileLocation = "data/features" ,
+  Description = "A folder containing the different feature sets for each .wav file, along with recorder ID that include location, time, and date. There is also a column for individual ID",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "The folder contains .csv files for acoustic indices, BirdNET, MFCCs, VGGIsh, and Wav2Vec2. For VGGIsh and BirdNET the .csv files are divided by recorder location."  
+)
+
+print(kable(metadata_df1))
+# Format the data frame as a kable table
+
+# Metadata table 2 --------------------------------------------------------
+
+# File name
+file_name <- Datafiles[2]
+
+# Create a data frame for metadata
+metadata_df2 <- data.frame(
+  FileLocation = "data/MB Playbacks 50 m.csv"  ,
+  Description = "A .csv file containing the GPS coordinates of the recorders",
+  Date = date(),
+  DateType = ".csv",
+  Summary = "This file contains the GPS coordinates of each recorder M01-M09"  
+)
+
+print(kable(metadata_df2))
+# Format the data frame as a kable table
+
+# Metadata table 2 --------------------------------------------------------
+
+# File name
+file_name <- Datafiles[2]
+
+# Create a data frame for metadata
+metadata_df2 <- data.frame(
+  FileLocation = "data/MB Playbacks 50 m.csv"  ,
+  Description = "A .csv file containing the GPS coordinates of the recorders",
+  Date = date(),
+  DateType = ".csv",
+  Summary = "This file contains the GPS coordinates of each recorder M01-M09"  
+)
+
+print(kable(metadata_df2))
+# Format the data frame as a kable table

@@ -20,7 +20,7 @@ levels(AllPlaybacksSNR$Recorder) <- c('M1 (0 m)', 'M2 (50 m)', 'M3 (100 m)', 'M4
                                       'M5 (200 m)', 'M6 (250 m)', 'M7 (300 m)')
 
 # Create boxplots for SNR analysis
-ggboxplot(data = AllPlaybacksSNR, x = 'Recorder', y = "SNR.dB", outlier.shape = NA) + ylab('SNR (dB re 20 μPa)')
+ggerrorplot(desc_stat = "mean_sd",data = AllPlaybacksSNR, x = 'Recorder', y = "SNR.dB", outlier.shape = NA) + ylab('SNR (dB re 20 μPa)')
 
 
 # Plotting randomization results -------------------------------------------------
@@ -44,24 +44,24 @@ levels(AllPlaybacksRand$Features) <- c('Acoustic Indices', 'BirdNET', 'MFCCs',
                                        'VGGish', 'Wav2Vec2')
 
 # Create ggplot2 plot 'PlotA' for Classification Accuracy by Features and Recorder
-PlotA <- ggboxplot(data = AllPlaybacksRand,
+PlotA <- ggerrorplot(desc_stat = "mean_sd",data = AllPlaybacksRand,
                    color = 'Recorder', fill = 'Recorder', y = 'AccuracyVal', x = 'Features') +
   scale_color_manual(values = viridis::viridis(7)) +
   scale_fill_manual(values = viridis::viridis(7)) +
   ylab('Classification Accuracy')
 
 # Create ggplot2 plot 'PlotBHDBSCAN' for Normalized Mutual Information (HDBSCAN) by Features and Recorder
-PlotBHDBSCAN <- ggboxplot(data = AllPlaybacksRand,
+PlotBHDBSCAN <- ggerrorplot(desc_stat = "mean_sd",data = AllPlaybacksRand,
                           color = 'Recorder', fill = 'Recorder', y = 'NMI.val', x = 'Features') +
   scale_color_manual(values = viridis::viridis(7)) +
   scale_fill_manual(values = viridis::viridis(7)) +
-  ylab('Normalized Mutual Information (HDBSCAN)')
+  ylab('Normalized Mutual Information \n (HDBSCAN)')
 
 # Calculate the deviation between 'N.Individual' and 'N.cluster' columns and add it as 'Deviation' column
 AllPlaybacksRand$Deviation <- AllPlaybacksRand$N.Individual - AllPlaybacksRand$N.cluster
 
 # Create ggplot2 plot 'PlotCHDBSCAN' for Number of Clusters (HDBSCAN) by Features and Recorder
-PlotCHDBSCAN <- ggboxplot(data = AllPlaybacksRand,
+PlotCHDBSCAN <- ggerrorplot(desc_stat = "mean_sd",data = AllPlaybacksRand,
                           color = 'Recorder', fill = 'Recorder', y = 'N.cluster', x = 'Features', outlier.shape = NA) +
   scale_color_manual(values = viridis::viridis(7)) +
   scale_fill_manual(values = viridis::viridis(7)) +
@@ -96,17 +96,17 @@ levels(AllPlaybacksRand$Features) <- c('Acoustic Indices', 'BirdNET', 'MFCCs',
                                        'VGGish', 'Wav2Vec2')
 
 # Create ggplot2 plot 'PlotBaffinity' for Normalized Mutual Information (affinity) by Features and Recorder
-PlotBaffinity <- ggboxplot(data = AllPlaybacksRand,
+PlotBaffinity <- ggerrorplot(desc_stat = "mean_sd",data = AllPlaybacksRand,
                            color = 'Recorder', fill = 'Recorder', y = 'NMI.val', x = 'Features') +
   scale_color_manual(values = viridis::viridis(7)) +
   scale_fill_manual(values = viridis::viridis(7)) +
-  ylab('Normalized Mutual Information (affinity)') + xlab('')
+  ylab('Normalized Mutual Information \n (affinity)') + xlab('')
 
 # Calculate the deviation between 'N.Individual' and 'N.cluster' columns and add it as 'Deviation' column
 AllPlaybacksRand$Deviation <- AllPlaybacksRand$N.Individual - AllPlaybacksRand$N.cluster
 
 # Create ggplot2 plot 'PlotCaffinity' for Number of Clusters (affinity) by Features and Recorder
-PlotCaffinity <- ggboxplot(data = AllPlaybacksRand,
+PlotCaffinity <- ggerrorplot(desc_stat = "mean_sd",data = AllPlaybacksRand,
                            color = 'Recorder', fill = 'Recorder', y = 'N.cluster', x = 'Features', outlier.shape = NA) +
   scale_color_manual(values = viridis::viridis(7)) +
   scale_fill_manual(values = viridis::viridis(7)) +
@@ -159,7 +159,7 @@ kableExtra::save_kable(my_table, file = 'Table 1 Online Supporting Material.pdf'
 # MFCC UMAP Plots ------------------------------------------------------
 
 # Read MFCCPlaybacks.csv
-MFCCPlaybacks <- read.csv('data/MFCCPlaybacks.csv')
+MFCCPlaybacks <- read.csv('data/features/MFCCPlaybacks.csv')
 
 # Extract the recorder information from the 'Recording' column
 MFCCPlaybacks$Recorder <- str_split_fixed(MFCCPlaybacks$Recording, pattern = '_', n = 2)[, 1]
@@ -200,7 +200,7 @@ MFCCM2Scatter <- ggpubr::ggscatter(data = plot.for.MFCCM2,x = "Dim.1",
 MFCCM2Scatter
 
 # BirdNET UMAP Plots ---------------------------------------------------
-file_names <- dir('data/BirdNET/', full.names = T)#where you have your files
+file_names <- dir('data/features/BirdNET/', full.names = T)#where you have your files
 
 BirdNETPlaybacks <- do.call(rbind,lapply(file_names,read.csv))
 
@@ -243,7 +243,7 @@ BirdNETM2Scatter
 
 
 # VGGish UMAP Plots ---------------------------------------------------
-file_names <- dir('data/VGGish/', full.names = T)#where you have your files
+file_names <- dir('data/features/VGGish/', full.names = T)#where you have your files
 
 VGGishPlaybacks <- do.call(rbind,lapply(file_names,read.csv))
 
@@ -289,7 +289,7 @@ VGGishM2Scatter
 
 # wav2vec2 UMAP Plots ---------------------------------------------------
 # Read wav2vec2Playbacks.csv
-wav2vec2Playbacks <- read.csv('data/wav2vecDFPlayback.csv')
+wav2vec2Playbacks <- read.csv('data/features/wav2vecmeansdDFPlayback.csv')
 
 # Extract the recorder information from the 'Recording' column
 wav2vec2Playbacks$Recorder <- str_split_fixed(wav2vec2Playbacks$RecorderID, pattern = '_', n = 2)[, 1]
@@ -311,7 +311,7 @@ wav2vec2PlaybacksSingleRecorderM2 <- droplevels(subset(wav2vec2Playbacks, Record
 wav2vec2PlaybacksSingleRecorderM6 <- droplevels(subset(wav2vec2Playbacks, Recorder == 'M6'))
 
 wav2vec2M2.umap <-
-  umap::umap(wav2vec2PlaybacksSingleRecorderM2 [, -c(769,771:773)],
+  umap::umap(wav2vec2PlaybacksSingleRecorderM2 [, -c(24:44)],
              #labels=as.factor(wav2vec2$Validation),
              controlscale=TRUE,scale=3,n_neighbors=5)
 
@@ -327,7 +327,7 @@ wav2vec2M2Scatter <- ggpubr::ggscatter(data = plot.for.wav2vec2M2,x = "Dim.1",
                                      color='Class')+guides(color='none')+
   scale_color_manual(values =viridis::viridis (length(
     unique(plot.for.wav2vec2M2$Class)
-  ))) + guides(color="none")+ggtitle( paste('wav2vec2'))+theme(
+  ))) + guides(color="none")+ggtitle( paste('Wav2Vec2'))+theme(
     axis.text.x=element_blank(),
     axis.ticks.x=element_blank(),axis.text.y=element_blank(),
     axis.ticks.y=element_blank())+   theme(plot.title = element_text(hjust = 1))  
@@ -336,7 +336,7 @@ wav2vec2M2Scatter
 
 
 # AcousticIndices UMAP Plots ---------------------------------------------------
-AcousticIndicesPlaybacks <- read.csv('data/AcousticIndicesDFPlayback.csv')
+AcousticIndicesPlaybacks <- read.csv('data/features/AcousticIndicesDFPlayback.csv')
 
 # Extract the recorder information from the 'Recording' column
 AcousticIndicesPlaybacks$Recorder <- str_split_fixed(AcousticIndicesPlaybacks$RecorderID, pattern = '_', n = 2)[, 1]
