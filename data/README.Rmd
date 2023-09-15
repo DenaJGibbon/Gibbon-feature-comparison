@@ -6,18 +6,11 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Metadata for all data included in the repository.
 
 ```{r, echo=FALSE, results='asis'}
 library(knitr)
 library(kableExtra)
-
-Datafiles <- list.files('data',full.names = T)
-
-
-# Metadata table 1 --------------------------------------------------------
-
-# File name
-file_name <- Datafiles[1]
 
 # Create a data frame for metadata
 metadata_df1 <- data.frame(
@@ -28,14 +21,9 @@ metadata_df1 <- data.frame(
   Summary = "The folder contains .csv files for acoustic indices, BirdNET, MFCCs, VGGIsh, and Wav2Vec2. For VGGIsh and BirdNET the .csv files are divided by recorder location."  
 )
 
-print(kable(metadata_df1))
 # Format the data frame as a kable table
 
 # Metadata table 2 --------------------------------------------------------
-
-# File name
-file_name <- Datafiles[2]
-
 # Create a data frame for metadata
 metadata_df2 <- data.frame(
   FileLocation = "data/MB Playbacks 50 m.csv"  ,
@@ -45,7 +33,37 @@ metadata_df2 <- data.frame(
   Summary = "This file contains the GPS coordinates of each recorder M01-M09"  
 )
 
-print(kable(metadata_df2))
+# Metadata table 2 --------------------------------------------------------
+# Create a data frame for metadata
+metadata_df3 <- data.frame(
+  FileLocation = "data/randomization_affinity"  ,
+  Description = "Contains a .csv files for each feature type",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "This file contains the classification accuracy, recorder, number of clusters returned by affinity propagation clustering, and normalized mutual information value "  
+)
+
+
+# Create a data frame for metadata
+metadata_df4 <- data.frame(
+  FileLocation = "data/randomization_hdbscan"  ,
+  Description = "Contains a .csv files for each feature type",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "This file contains the classification accuracy, recorder, number of clusters returned by hdbscan, and normalized mutual information value "  
+)
+
+# Create a data frame for metadata
+metadata_df5 <- data.frame(
+  FileLocation = "data/snr_df"  ,
+  Description = "Contains a .csv files for each recorder location",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "This file contains the recording ID, signal-to-noise ratio, recorder, and wave file path."  
+)
+
+
+print(kable(rbind.data.frame(metadata_df1, metadata_df2,metadata_df3,metadata_df4,metadata_df5)))
 # Format the data frame as a kable table
 
 ```
