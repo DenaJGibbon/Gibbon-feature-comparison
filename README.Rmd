@@ -18,7 +18,69 @@ Feature extraction was done in both R and Python, and analyses for publication w
 
 
 # Data availability
-Acoustic data can be downloaded at: 10.5281/zenodo.8205685. Processed data can be found in the 'data/features/features' folder.
+Acoustic data can be downloaded at: 10.5281/zenodo.8205685. 
+
+## Metadata for all data included in the repository.
+
+```{r, echo=FALSE, results='asis'}
+library(knitr)
+library(kableExtra)
+
+# Create a data frame for metadata
+metadata_df1 <- data.frame(
+  FileLocation = "data/features" ,
+  Description = "A folder containing the different feature sets for each .wav file, along with recorder ID that include location, time, and date. There is also a column for individual ID",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "The folder contains .csv files for acoustic indices, BirdNET, MFCCs, VGGIsh, and Wav2Vec2. For VGGIsh and BirdNET the .csv files are divided by recorder location."  
+)
+
+# Format the data frame as a kable table
+
+# Metadata table 2 --------------------------------------------------------
+# Create a data frame for metadata
+metadata_df2 <- data.frame(
+  FileLocation = "data/MB Playbacks 50 m.csv"  ,
+  Description = "A .csv file containing the GPS coordinates of the recorders",
+  Date = date(),
+  DateType = ".csv",
+  Summary = "This file contains the GPS coordinates of each recorder M01-M09"  
+)
+
+# Metadata table 2 --------------------------------------------------------
+# Create a data frame for metadata
+metadata_df3 <- data.frame(
+  FileLocation = "data/randomization_affinity"  ,
+  Description = "Contains a .csv files for each feature type",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "This file contains the classification accuracy, recorder, number of clusters returned by affinity propagation clustering, and normalized mutual information value "  
+)
+
+
+# Create a data frame for metadata
+metadata_df4 <- data.frame(
+  FileLocation = "data/randomization_hdbscan"  ,
+  Description = "Contains a .csv files for each feature type",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "This file contains the classification accuracy, recorder, number of clusters returned by hdbscan, and normalized mutual information value "  
+)
+
+# Create a data frame for metadata
+metadata_df5 <- data.frame(
+  FileLocation = "data/snr_df"  ,
+  Description = "Contains a .csv files for each recorder location",
+  Date = date(),
+  DateType = "Folder",
+  Summary = "This file contains the recording ID, signal-to-noise ratio, recorder, and wave file path."  
+)
+
+
+print(kable(rbind.data.frame(metadata_df1, metadata_df2,metadata_df3,metadata_df4,metadata_df5)))
+# Format the data frame as a kable table
+
+```
 
 # Feature/embedding extraction on the audio data
 
